@@ -1,0 +1,47 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--bg-off-white-40);
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.typeRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.type {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.marksBadge {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.instruction {
+  font-style: italic;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+.questionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
