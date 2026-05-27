@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Assignment } from '../models/Assignment';
 import { asyncHandler, createAppError } from '../middleware/errorHandler';
 import { getRedisConnection } from '../config/redis';
+import { enqueueGenerationJob } from '../queue/queue';
 import type { CreateAssignmentRequest, ApiResponse, IAssignment } from '../types';
 
 // ============================================
@@ -25,8 +26,8 @@ export const createAssignment = asyncHandler(async (req: Request, res: Response)
     status: 'pending',
   });
 
-  // Queue will be set up in commit 4 - for now just save
-  // The queue import and job enqueue will be added in the BullMQ commit
+  // Enqueue AI generation job
+  await enqueueGenerationJob(assignment.id);
 
   const response: ApiResponse<IAssignment> = {
     success: true,
@@ -114,7 +115,8 @@ export const regenerateAssignment = asyncHandler(async (req: Request, res: Respo
   const redis = getRedisConnection();
   await redis.del(`${CACHE_PREFIX}${id}`);
 
-  // Queue will re-enqueue job in commit 4
+  // Re-enqueue job
+  await enqueueGenerationJob(assignment.id);
 
   const response: ApiResponse<IAssignment> = {
     success: true,
