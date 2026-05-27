@@ -1,0 +1,64 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background: var(--bg-white);
+  border: var(--border-dashed);
+  border-radius: var(--radius-upload);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.container:hover, .container.active {
+  border-color: var(--status-green);
+  background: rgba(75, 194, 109, 0.05);
+}
+
+.iconWrapper {
+  width: 48px;
+  height: 48px;
+  background: var(--bg-off-white-20);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.icon {
+  font-size: 24px;
+}
+
+.text {
+  font-family: var(--font-primary);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.highlight {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.subtext {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.browseButton {
+  background: var(--bg-white);
+  border: 1px solid var(--bg-off-white-40);
+  padding: 8px 24px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-primary);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  pointer-events: none; /* Let the dropzone handle clicks */
+}

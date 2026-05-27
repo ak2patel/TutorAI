@@ -1,0 +1,31 @@
+.container {
+  display: flex;
+  align-items: center;
+  background: var(--bg-white);
+  border: var(--border-pill);
+  border-radius: var(--radius-pill);
+  padding: 11px 16px;
+  gap: 8px;
+  width: 100%;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-family: var(--font-primary);
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.input::placeholder {
+  color: var(--text-placeholder);
+}

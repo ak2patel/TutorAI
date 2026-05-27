@@ -1,0 +1,22 @@
+.container {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.segment {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-off-white-40);
+  border-radius: 100px;
+  transition: background 0.3s ease;
+}
+
+.segment.active {
+  background: #5E5E5E;
+}
+
+.segment.completed {
+  background: var(--btn-primary);
+}
