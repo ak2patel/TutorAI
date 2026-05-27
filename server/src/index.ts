@@ -8,6 +8,9 @@ import { disconnectRedis } from './config/redis';
 import assignmentRoutes from './routes/assignment.routes';
 import { errorHandler } from './middleware/errorHandler';
 import { apiLimiter } from './middleware/rateLimiter';
+import { initWebSocket, emitAssignmentStatus } from './websocket/socket';
+import { startWorker, closeWorker, setStatusEmitter } from './queue/worker';
+import { closeQueue } from './queue/queue';
 
 // ============================================
 // VedaAI Server Entry Point
@@ -40,6 +43,13 @@ app.use(errorHandler);
 const startServer = async (): Promise<void> => {
   await connectDatabase();
 
+  // Initialize Socket.IO
+  initWebSocket(httpServer);
+
+  // Initialize BullMQ Worker
+  setStatusEmitter(emitAssignmentStatus);
+  startWorker();
+
   httpServer.listen(env.PORT, () => {
     console.log(`🚀 VedaAI Server running on port ${env.PORT}`);
     console.log(`📡 Environment: ${env.NODE_ENV}`);
@@ -51,6 +61,8 @@ const gracefulShutdown = async (signal: string): Promise<void> => {
   console.log(`\n🛑 Received ${signal}. Shutting down gracefully...`);
   
   httpServer.close(async () => {
+    await closeWorker();
+    await closeQueue();
     await disconnectDatabase();
     await disconnectRedis();
     console.log('👋 Server shut down complete');
