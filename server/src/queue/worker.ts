@@ -1,5 +1,5 @@
 import { Worker, Job } from 'bullmq';
-import { getRedisConnection } from '../config/redis';
+import { getRedisConnection, getBullMQConnectionOptions } from '../config/redis';
 import { Assignment } from '../models/Assignment';
 import { buildPrompt, parseGeneratedPaper } from '../services/prompt.service';
 import { generateWithGroq } from '../services/llm.service';
@@ -96,12 +96,8 @@ export const startWorker = (): Worker => {
       await processGenerationJob(job);
     },
     {
-      connection: getRedisConnection(),
-      concurrency: 2, // Process up to 2 jobs at a time
-      limiter: {
-        max: 5,
-        duration: 60000, // Max 5 jobs per minute (rate limit protection)
-      },
+      connection: getBullMQConnectionOptions(),
+      concurrency: 2,
     }
   );
 

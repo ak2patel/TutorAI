@@ -1,4 +1,4 @@
-import type { IAssignment } from '../../../types';
+import type { IAssignment } from '../../types';
 import AssignmentCard from './AssignmentCard';
 
 interface Props {

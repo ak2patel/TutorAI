@@ -1,142 +1,243 @@
-.page {
-  --background: #fafafa;
-  --foreground: #fff;
-
-  --text-primary: #000;
-  --text-secondary: #666;
-
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-  --button-secondary-border: #ebebeb;
-
+.center {
   display: flex;
+  justify-content: center;
+  align-items: center;
   flex: 1;
+}
+
+.muted {
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+/* ---- Empty State ---- */
+.emptyState {
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-geist-sans);
-  background-color: var(--background);
-}
-
-.main {
-  display: flex;
   flex: 1;
-  width: 100%;
-  max-width: 800px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  background-color: var(--foreground);
-  padding: 120px 60px;
+  text-align: center;
+  padding: 48px 24px;
 }
 
-.intro {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: 24px;
+.emptyIllustration {
+  margin-bottom: 24px;
 }
 
-.intro h1 {
-  max-width: 320px;
-  font-size: 40px;
+.emptyTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.emptyDesc {
+  font-size: 15px;
+  color: var(--text-muted);
+  max-width: 460px;
+  line-height: 155%;
+  margin-bottom: 28px;
+}
+
+.emptyBtn {
+  background: var(--btn-primary);
+  color: var(--bg-white);
+  padding: 14px 28px;
+  border-radius: var(--radius-pill);
   font-weight: 600;
-  line-height: 48px;
-  letter-spacing: -2.4px;
-  text-wrap: balance;
-  color: var(--text-primary);
+  font-size: 15px;
+  transition: transform 0.2s ease;
 }
 
-.intro p {
-  max-width: 440px;
-  font-size: 18px;
-  line-height: 32px;
-  text-wrap: balance;
-  color: var(--text-secondary);
+.emptyBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
 }
 
-.intro a {
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.ctas {
+/* ---- Dashboard Filled ---- */
+.dashboard {
   display: flex;
-  flex-direction: row;
-  width: 100%;
-  max-width: 440px;
-  gap: 16px;
+  flex-direction: column;
+  flex: 1;
+  position: relative;
+  padding-bottom: 80px;
+}
+
+.titleRow {
+  margin-bottom: 4px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.subtitle {
   font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 2px;
 }
 
-.ctas a {
+.statusDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--status-green);
+  box-shadow: 0 0 0 3px var(--status-green-ring);
+  display: inline-block;
+  margin-right: 6px;
+}
+
+/* ---- Filter Row ---- */
+.filterRow {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 128px;
-  border: 1px solid transparent;
-  transition: 0.2s;
-  cursor: pointer;
-  width: fit-content;
+  margin: 16px 0 20px 0;
+  gap: 16px;
+}
+
+.filterLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.filterIcon {
+  font-size: 12px;
+}
+
+.filterLabel {
   font-weight: 500;
 }
 
-a.primary {
-  background: var(--text-primary);
-  color: var(--background);
+.searchBox {
+  display: flex;
+  align-items: center;
+  background: var(--bg-white);
+  border: var(--border-pill);
+  border-radius: var(--radius-pill);
+  padding: 8px 16px;
   gap: 8px;
+  min-width: 220px;
 }
 
-a.secondary {
-  border-color: var(--button-secondary-border);
+.searchIcon {
+  font-size: 14px;
+  color: var(--text-muted);
 }
 
-/* Enable hover only on non-touch devices */
-@media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
-  }
-
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
-  }
+.searchInput {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-family: var(--font-primary);
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
 }
 
-@media (max-width: 600px) {
-  .main {
-    padding: 48px 24px;
-  }
-
-  .intro {
-    gap: 16px;
-  }
-
-  .intro h1 {
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: -1.92px;
-  }
+.searchInput::placeholder {
+  color: var(--text-placeholder);
 }
 
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
+/* ---- Cards Grid ---- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: var(--bg-white);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.07);
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.cardTitle {
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text-primary);
+}
+
+.cardMenu {
+  font-size: 20px;
+  color: var(--text-muted);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.cardMenu:hover {
+  background: var(--bg-off-white);
+}
+
+.cardDates {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ---- Floating Button ---- */
+.floatingBtn {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--btn-primary);
+  color: var(--bg-white);
+  padding: 14px 32px;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 15px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  z-index: 50;
+  transition: transform 0.2s ease;
+}
+
+.floatingBtn:hover {
+  transform: translateX(-50%) translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+}
+
+@media (max-width: 768px) {
+  .filterRow {
+    flex-direction: column;
+    align-items: stretch;
   }
-
-  .page {
-    --background: #000;
-    --foreground: #000;
-
-    --text-primary: #ededed;
-    --text-secondary: #999;
-
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-    --button-secondary-border: #1a1a1a;
+  .searchBox {
+    min-width: auto;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .floatingBtn {
+    bottom: 96px;
   }
 }

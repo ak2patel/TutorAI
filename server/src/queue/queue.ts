@@ -1,5 +1,5 @@
 import { Queue } from 'bullmq';
-import { getRedisConnection } from '../config/redis';
+import { getBullMQConnectionOptions } from '../config/redis';
 
 // ============================================
 // BullMQ Queue Definition
@@ -13,7 +13,7 @@ let generationQueue: Queue | null = null;
 export const getGenerationQueue = (): Queue => {
   if (!generationQueue) {
     generationQueue = new Queue(QUEUE_NAME, {
-      connection: getRedisConnection(),
+      connection: getBullMQConnectionOptions(),
       defaultJobOptions: {
         attempts: 2,
         backoff: {
@@ -21,10 +21,10 @@ export const getGenerationQueue = (): Queue => {
           delay: 5000,
         },
         removeOnComplete: {
-          count: 100, // Keep last 100 completed jobs
+          count: 100,
         },
         removeOnFail: {
-          count: 50, // Keep last 50 failed jobs
+          count: 50,
         },
       },
     });

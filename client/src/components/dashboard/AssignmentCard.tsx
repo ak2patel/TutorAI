@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useDeleteAssignmentMutation } from '../../../services/api';
-import type { IAssignment } from '../../../types';
+import { useDeleteAssignmentMutation } from '../../services/api';
+import type { IAssignment } from '../../types';
 import styles from './AssignmentCard.module.css';
 
 interface Props {

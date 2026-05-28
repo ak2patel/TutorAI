@@ -12,6 +12,7 @@
   --bg-off-white-40: #DADADA;
   --bg-dark-grey: #2B2B2B;
   --bg-dark: #444444;
+  --bg-blur: rgba(76, 76, 76, 0.4);
   
   /* Text */
   --text-primary: #303030;
@@ -35,6 +36,8 @@
   /* Shadows */
   --shadow-realistic: 0px 16px 48px rgba(0,0,0,0.12),
                       0px 32px 48px rgba(0,0,0,0.2);
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.04);
+  --shadow-card-hover: 0 8px 32px rgba(0,0,0,0.08);
   
   /* Borders */
   --border-dashed: 1.75px dashed rgba(0, 0, 0, 0.2);

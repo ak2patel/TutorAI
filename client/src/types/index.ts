@@ -44,7 +44,8 @@ export interface IGeneratedPaper {
 export type AssignmentStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
 export interface IAssignment {
-  id: string; // Mongoose transforms _id to id
+  id: string;
+  _id?: string;
   title: string;
   subject: string;
   topic?: string;
@@ -63,7 +64,12 @@ export interface IAssignment {
   updatedAt: string;
 }
 
-// API request/response types
+export interface GenerationStatusEvent {
+  assignmentId: string;
+  status: AssignmentStatus;
+  message?: string;
+}
+
 export interface CreateAssignmentRequest {
   title: string;
   subject: string;

@@ -7,41 +7,39 @@
 .header {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--bg-off-white-40);
+  gap: 12px;
+  align-items: center; /* Figma centers section title */
 }
 
 .title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   margin: 0;
+  color: #000;
 }
 
-.typeRow {
+.metaRow {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  gap: 4px;
 }
 
 .type {
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.marksBadge {
   font-weight: 700;
-  color: var(--text-primary);
+  font-size: 14px;
+  color: #000;
 }
 
 .instruction {
   font-style: italic;
-  color: var(--text-muted);
-  margin-top: 8px;
+  font-size: 13px;
+  color: #333;
 }
 
 .questionsList {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 16px;
 }

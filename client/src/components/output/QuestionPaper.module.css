@@ -2,38 +2,59 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
-  padding-bottom: 64px;
+  width: 100%;
 }
 
-.toolbar {
-  display: flex;
-  gap: 16px;
-  align-self: flex-end;
+.darkBanner {
+  background: var(--bg-dark-grey);
+  width: 100%;
+  border-radius: var(--radius-card);
+  padding: 24px 32px;
+  color: var(--bg-white);
+  margin-bottom: -100px;
+  min-height: 200px;
 }
 
-.actionButton {
+.bannerContent {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.bannerText {
+  font-family: var(--font-primary);
+  font-size: 15px;
+  line-height: 150%;
+  margin-bottom: 16px;
+  color: var(--bg-white);
+}
+
+.downloadBtn {
+  background: var(--bg-white);
+  color: var(--text-primary);
+  border-radius: var(--radius-pill);
+  padding: 10px 20px;
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 14px;
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--bg-white);
-  border: var(--border-pill);
-  padding: 8px 16px;
-  border-radius: var(--radius-pill);
-  font-family: var(--font-primary);
-  font-weight: 500;
-  font-size: 14px;
-  color: var(--text-primary);
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease;
+  border: none;
+  cursor: pointer;
 }
 
-.actionButton:hover {
-  background: var(--bg-off-white);
+.downloadBtn:hover {
   transform: translateY(-2px);
 }
 
-.icon {
-  font-size: 16px;
+.paperWrapper {
+  width: 100%;
+  max-width: 850px;
+  padding: 0 24px;
+  position: relative;
+  z-index: 10;
+  margin-bottom: 64px;
 }
 
 .paperPage {
@@ -41,26 +62,31 @@
   border-radius: var(--radius-card);
   padding: 64px;
   width: 100%;
-  max-width: 850px; /* A4 aspect ratio approx */
-  box-shadow: var(--shadow-realistic);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 48px;
+  color: #000; /* Force black text for print */
 }
 
 .header {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  border-bottom: 2px solid var(--text-primary);
-  padding-bottom: 24px;
+  gap: 12px;
 }
 
 .institution {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   text-align: center;
+  margin: 0;
+  color: #000;
+}
+
+.subject, .class {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
   margin: 0;
 }
 
@@ -68,21 +94,28 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 24px;
 }
 
-.instructions {
-  width: 100%;
-  text-align: left;
-  background: var(--bg-off-white);
-  padding: 16px;
-  border-radius: 12px;
-  margin-top: 16px;
+.generalInstructions {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 24px;
 }
 
-.instructions strong {
-  display: block;
-  margin-bottom: 8px;
+.studentDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.studentDetails p {
+  margin: 0;
 }
 
 .sections {
@@ -91,19 +124,48 @@
   gap: 48px;
 }
 
+.answerKey {
+  margin-top: 48px;
+  padding-top: 48px;
+  border-top: 2px dashed #ccc;
+}
+
+.answerKey h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.answerKey ol {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.answerKey li {
+  font-size: 14px;
+  line-height: 150%;
+}
+
 /* Print styles */
 @media print {
-  .container {
-    padding: 0;
+  body * {
+    visibility: hidden;
   }
-  
-  .toolbar {
-    display: none;
+  .paperPage, .paperPage * {
+    visibility: visible;
   }
-  
   .paperPage {
-    box-shadow: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
     padding: 0;
-    max-width: 100%;
+    box-shadow: none;
+  }
+  .darkBanner {
+    display: none;
   }
 }

@@ -1,6 +1,6 @@
 import Select from '../ui/Select';
 import NumberStepper from '../ui/NumberStepper';
-import type { IQuestionType } from '../../../types';
+import type { IQuestionType } from '../../types';
 import styles from './QuestionTypeRow.module.css';
 
 interface Props {

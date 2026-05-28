@@ -1,77 +1,70 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useCreateAssignmentMutation } from '../../../services/api';
-import { joinAssignmentRoom, leaveAssignmentRoom } from '../../../services/websocket';
-import { useAppDispatch } from '../../../store/hooks';
-import { setCurrentAssignmentId } from '../../../store/slices/assessmentSlice';
-import type { CreateAssignmentRequest, IQuestionType } from '../../../types';
-
-import StepProgress from './StepProgress';
-import PillInput from '../ui/PillInput';
-import FileUpload from './FileUpload';
-import QuestionTypeRow from './QuestionTypeRow';
-import Button from '../ui/Button';
-import GenerationProgress from './GenerationProgress';
+import { useRouter } from 'next/navigation';
+import { useCreateAssignmentMutation } from '../../services/api';
+import { joinAssignmentRoom } from '../../services/websocket';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { setCurrentAssignmentId, setGenerationStatus } from '../../store/slices/assessmentSlice';
+import type { CreateAssignmentRequest, IQuestionType } from '../../types';
 import styles from './AssessmentForm.module.css';
+
+const QUESTION_TYPE_OPTIONS = [
+  'Multiple Choice Questions',
+  'Short Questions',
+  'Diagram/Graph-Based Questions',
+  'Numerical Problems',
+  'Long Answer Questions',
+  'True/False',
+];
 
 export default function AssessmentForm() {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const [createAssignment, { isLoading }] = useCreateAssignmentMutation();
-  
-  // Form State
-  const [currentStep, setCurrentStep] = useState(1);
+  const { generationStatus, currentAssignmentId } = useAppSelector(s => s.assessment);
+
   const [formData, setFormData] = useState<Partial<CreateAssignmentRequest>>({
     title: '',
     subject: '',
     className: '',
     dueDate: '',
-    questionTypes: [{ type: 'Multiple Choice Questions', numberOfQuestions: 5, marksPerQuestion: 1 }],
-    additionalInstructions: ''
+    questionTypes: [
+      { type: 'Multiple Choice Questions', numberOfQuestions: 4, marksPerQuestion: 1 },
+      { type: 'Short Questions', numberOfQuestions: 3, marksPerQuestion: 2 },
+      { type: 'Diagram/Graph-Based Questions', numberOfQuestions: 5, marksPerQuestion: 5 },
+      { type: 'Numerical Problems', numberOfQuestions: 5, marksPerQuestion: 5 },
+    ],
+    additionalInstructions: '',
   });
-  const [fileContent, setFileContent] = useState<string>('');
-  const [fileName, setFileName] = useState<string>('');
+  const [fileName, setFileName] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Derived state
-  const totalQuestions = formData.questionTypes?.reduce((acc, curr) => acc + curr.numberOfQuestions, 0) || 0;
-  const totalMarks = formData.questionTypes?.reduce((acc, curr) => acc + (curr.numberOfQuestions * curr.marksPerQuestion), 0) || 0;
+  const totalQuestions = formData.questionTypes?.reduce((a, c) => a + c.numberOfQuestions, 0) || 0;
+  const totalMarks = formData.questionTypes?.reduce((a, c) => a + c.numberOfQuestions * c.marksPerQuestion, 0) || 0;
 
-  // Cleanup websocket room on unmount
+  // Redirect to output page when generation completes
   useEffect(() => {
-    return () => {
-      // Just a safety cleanup
-      dispatch(setCurrentAssignmentId(null));
-    };
+    if (generationStatus?.status === 'completed' && currentAssignmentId) {
+      setTimeout(() => {
+        router.push(`/assignment/${currentAssignmentId}`);
+      }, 800);
+    }
+  }, [generationStatus, currentAssignmentId, router]);
+
+  useEffect(() => {
+    return () => { dispatch(setCurrentAssignmentId(null)); };
   }, [dispatch]);
 
-  const handleNext = () => {
-    if (currentStep === 1) {
-      if (!formData.title || !formData.subject || !formData.className || !formData.dueDate) {
-        setErrorMsg('Please fill in all required fields');
-        return;
-      }
-    }
-    setErrorMsg('');
-    setCurrentStep(s => Math.min(s + 1, 3));
-  };
-
-  const handleBack = () => setCurrentStep(s => Math.max(s - 1, 1));
-
-  const handleAddQuestionType = () => {
+  const handleAddQuestionType = (e: React.MouseEvent) => {
+    e.preventDefault();
     setFormData(prev => ({
       ...prev,
       questionTypes: [
         ...(prev.questionTypes || []),
-        { type: 'Short Answer Questions', numberOfQuestions: 1, marksPerQuestion: 2 }
-      ]
+        { type: 'Long Answer Questions', numberOfQuestions: 1, marksPerQuestion: 2 },
+      ],
     }));
-  };
-
-  const handleUpdateQuestionType = (index: number, updated: IQuestionType) => {
-    const newTypes = [...(formData.questionTypes || [])];
-    newTypes[index] = updated;
-    setFormData({ ...formData, questionTypes: newTypes });
   };
 
   const handleRemoveQuestionType = (index: number) => {
@@ -81,166 +74,197 @@ export default function AssessmentForm() {
     setFormData({ ...formData, questionTypes: newTypes });
   };
 
-  const handleSubmit = async () => {
+  const updateQT = (index: number, field: keyof IQuestionType, value: string | number) => {
+    const newTypes = [...(formData.questionTypes || [])];
+    newTypes[index] = { ...newTypes[index], [field]: value };
+    setFormData({ ...formData, questionTypes: newTypes });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) setFileName(file.name);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+
+    if (!formData.dueDate) {
+      setErrorMsg('Due date is required.');
+      return;
+    }
+    if ((formData.questionTypes?.length || 0) === 0) {
+      setErrorMsg('Add at least one question type.');
+      return;
+    }
+
     try {
-      setErrorMsg('');
-      
       const payload: CreateAssignmentRequest = {
-        title: formData.title!,
-        subject: formData.subject!,
-        className: formData.className!,
-        dueDate: formData.dueDate!,
+        title: formData.title || `${formData.subject || 'General'} Assessment`,
+        subject: formData.subject || 'General',
+        className: formData.className || '5th',
+        dueDate: formData.dueDate,
         questionTypes: formData.questionTypes!,
         totalQuestions,
         totalMarks,
         additionalInstructions: formData.additionalInstructions,
-        // We would include fileContent here in a real app if the backend supported it in this endpoint
-        // For this assignment, we'll append it to additionalInstructions for simplicity
       };
 
-      if (fileContent) {
-        payload.additionalInstructions = `[UPLOADED CONTENT FROM ${fileName}]:\n${fileContent}\n\n${payload.additionalInstructions || ''}`;
-      }
-
+      dispatch(setGenerationStatus({ status: 'pending', message: 'Creating assignment...' }));
       const response = await createAssignment(payload).unwrap();
-      
-      // Setup websocket listening
-      dispatch(setCurrentAssignmentId(response.id));
-      joinAssignmentRoom(response.id);
-      
+      dispatch(setCurrentAssignmentId(response.id || (response as any)._id));
+      dispatch(setGenerationStatus({ status: 'processing', message: 'AI is generating your question paper...' }));
+      joinAssignmentRoom(response.id || (response as any)._id);
     } catch (err: any) {
+      dispatch(setGenerationStatus({ status: 'failed', message: err.data?.error || 'Failed to create' }));
       setErrorMsg(err.data?.error || err.message || 'Failed to create assignment');
     }
   };
 
+  const isGenerating = generationStatus?.status === 'processing' || generationStatus?.status === 'pending';
+
   return (
-    <div className={styles.container}>
-      <GenerationProgress />
-      
-      <div className={styles.header}>
-        <h2 className="h2-title">Create New Assignment</h2>
-        <p className={styles.subtitle}>Fill in the details to generate an AI assessment</p>
-      </div>
+    <>
+      {/* Generation overlay */}
+      {isGenerating && (
+        <div className={styles.overlay}>
+          <div className={styles.overlayCard}>
+            <div className={styles.spinner} />
+            <h3 className={styles.overlayTitle}>Generating Assessment...</h3>
+            <p className={styles.overlayMsg}>{generationStatus?.message}</p>
+          </div>
+        </div>
+      )}
 
-      <StepProgress currentStep={currentStep} totalSteps={3} />
-      
-      {errorMsg && <div className={styles.errorBanner}>{errorMsg}</div>}
+      {generationStatus?.status === 'failed' && (
+        <div className={styles.overlay}>
+          <div className={styles.overlayCard}>
+            <div className={styles.errorCircle}>!</div>
+            <h3 className={styles.overlayTitle}>Generation Failed</h3>
+            <p className={styles.overlayMsg}>{generationStatus?.message}</p>
+            <button className={styles.retryBtn} onClick={() => {
+              dispatch(setGenerationStatus({ status: 'pending', message: '' }));
+              dispatch(setCurrentAssignmentId(null));
+              window.location.reload();
+            }}>Try Again</button>
+          </div>
+        </div>
+      )}
 
-      <div className={styles.formContent}>
-        {currentStep === 1 && (
-          <div className={styles.stepContainer}>
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label>Assignment Title*</label>
-                <PillInput 
-                  placeholder="e.g. Thermodynamics Weekly Test" 
-                  value={formData.title}
-                  onChange={e => setFormData({...formData, title: e.target.value})}
-                />
-              </div>
-            </div>
-            
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label>Subject*</label>
-                <PillInput 
-                  placeholder="e.g. Physics" 
-                  value={formData.subject}
-                  onChange={e => setFormData({...formData, subject: e.target.value})}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Class/Grade*</label>
-                <PillInput 
-                  placeholder="e.g. 11th Science" 
-                  value={formData.className}
-                  onChange={e => setFormData({...formData, className: e.target.value})}
-                />
-              </div>
-            </div>
-
-            <div className={styles.formRow}>
-              <div className={styles.formGroup}>
-                <label>Due Date*</label>
-                <PillInput 
-                  type="date"
-                  value={formData.dueDate}
-                  onChange={e => setFormData({...formData, dueDate: e.target.value})}
-                />
-              </div>
+      <form className={styles.formCard} onSubmit={handleSubmit}>
+        {/* Progress indicator */}
+        <div className={styles.progressBar}>
+          <div className={styles.progressStep}>
+            <div className={styles.progressDot} />
+            <div className={styles.progressText}>
+              <div className={styles.progressTitle}>Create Assignment</div>
+              <div className={styles.progressSubtitle}>Set up a new assignment for your students</div>
             </div>
           </div>
-        )}
+          <div className={styles.progressLine} />
+          <div className={styles.progressLineInactive} />
+        </div>
 
-        {currentStep === 2 && (
-          <div className={styles.stepContainer}>
-            <div className={styles.sectionHeader}>
-              <h3 className={styles.sectionTitle}>Question Types</h3>
-              <div className={styles.totalsBadge}>
-                Total: {totalQuestions} Questions | {totalMarks} Marks
+        {/* Section: Assignment Details */}
+        <h3 className={styles.sectionTitle}>Assignment Details</h3>
+        <p className={styles.sectionSubtitle}>Basic information about your assignment</p>
+
+        {/* File Upload */}
+        <label className={styles.uploadZone} htmlFor="fileUpload">
+          <div className={styles.uploadIcon}>☁️</div>
+          <p className={styles.uploadText}>
+            {fileName ? <><strong>{fileName}</strong> selected</> : <>Choose a file or drag &amp; drop it here</>}
+          </p>
+          <p className={styles.uploadHint}>JPEG, PNG, upto 10MB</p>
+          <span className={styles.browseBtn}>Browse Files</span>
+          <input type="file" id="fileUpload" accept=".pdf,.txt,.jpg,.jpeg,.png" onChange={handleFileChange} hidden />
+        </label>
+        <p className={styles.uploadCaption}>Upload images of your preferred document/image</p>
+
+        {/* Due Date */}
+        <div className={styles.fieldGroup}>
+          <span className={styles.fieldLabel}>Due Date</span>
+          <input
+            type="date"
+            className={styles.pillInput}
+            value={formData.dueDate}
+            onChange={e => setFormData({ ...formData, dueDate: e.target.value })}
+            placeholder="DD-MM-YYYY"
+          />
+        </div>
+
+        {/* Question Types */}
+        <div className={styles.fieldGroup}>
+          <span className={styles.fieldLabel}>Question Type</span>
+          <div className={styles.qtHeader}>
+            <span className={styles.qtHeaderLabel}></span>
+            <span className={styles.qtHeaderLabel}>No. of Questions</span>
+            <span className={styles.qtHeaderLabel}>Marks</span>
+          </div>
+
+          {formData.questionTypes?.map((qt, idx) => (
+            <div className={styles.qtRow} key={idx}>
+              <div className={styles.qtSelectWrap}>
+                <select
+                  className={styles.qtSelect}
+                  value={qt.type}
+                  onChange={e => updateQT(idx, 'type', e.target.value)}
+                >
+                  {QUESTION_TYPE_OPTIONS.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+                <button type="button" className={styles.qtRemove} onClick={() => handleRemoveQuestionType(idx)} aria-label="Remove question type">×</button>
+              </div>
+              <div className={styles.qtStepper}>
+                <button type="button" onClick={() => updateQT(idx, 'numberOfQuestions', Math.max(1, qt.numberOfQuestions - 1))} aria-label="Decrease questions">−</button>
+                <span>{qt.numberOfQuestions}</span>
+                <button type="button" onClick={() => updateQT(idx, 'numberOfQuestions', qt.numberOfQuestions + 1)} aria-label="Increase questions">+</button>
+              </div>
+              <div className={styles.qtStepper}>
+                <button type="button" onClick={() => updateQT(idx, 'marksPerQuestion', Math.max(1, qt.marksPerQuestion - 1))} aria-label="Decrease marks">−</button>
+                <span>{qt.marksPerQuestion}</span>
+                <button type="button" onClick={() => updateQT(idx, 'marksPerQuestion', qt.marksPerQuestion + 1)} aria-label="Increase marks">+</button>
               </div>
             </div>
+          ))}
 
-            <div className={styles.questionsList}>
-              {formData.questionTypes?.map((qt, idx) => (
-                <QuestionTypeRow 
-                  key={idx}
-                  data={qt}
-                  onChange={(updated) => handleUpdateQuestionType(idx, updated)}
-                  onRemove={() => handleRemoveQuestionType(idx)}
-                />
-              ))}
-            </div>
+          <button type="button" className={styles.addTypeBtn} onClick={handleAddQuestionType}>
+            <span className={styles.addIcon}>+</span> Add Question Type
+          </button>
+        </div>
 
-            <button className={styles.addButton} onClick={handleAddQuestionType}>
-              + Add Question Type
-            </button>
+        {/* Totals */}
+        <div className={styles.totalsRow}>
+          <span>Total Questions : <strong>{totalQuestions}</strong></span>
+          <span>Total Marks : <strong>{totalMarks}</strong></span>
+        </div>
+
+        {/* Additional Instructions */}
+        <div className={styles.fieldGroup}>
+          <span className={styles.fieldLabel}>Additional Information (For better output)</span>
+          <div className={styles.textareaWrap}>
+            <textarea
+              className={styles.textarea}
+              placeholder="e.g Generate a question paper for 3 hour exam duration..."
+              value={formData.additionalInstructions}
+              onChange={e => setFormData({ ...formData, additionalInstructions: e.target.value })}
+              rows={3}
+            />
+            <span className={styles.textareaIcon}>🎤</span>
           </div>
-        )}
+        </div>
 
-        {currentStep === 3 && (
-          <div className={styles.stepContainer}>
-            <div className={styles.formGroup}>
-              <label>Reference Material (Optional)</label>
-              <p className={styles.helperText}>Upload syllabus, chapters, or specific notes for the AI to base questions on.</p>
-              <FileUpload 
-                onFileSelect={(content, name) => {
-                  setFileContent(content);
-                  setFileName(name);
-                }}
-                fileName={fileName}
-              />
-            </div>
+        {errorMsg && <div className={styles.errorBanner}>{errorMsg}</div>}
 
-            <div className={styles.formGroup} style={{ marginTop: '24px' }}>
-              <label>Additional Instructions</label>
-              <textarea 
-                className={styles.textarea}
-                placeholder="e.g. Focus mainly on the laws of thermodynamics. Make questions application-based."
-                value={formData.additionalInstructions}
-                onChange={e => setFormData({...formData, additionalInstructions: e.target.value})}
-                rows={4}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className={styles.footer}>
-        <Button 
-          variant="secondary" 
-          onClick={handleBack} 
-          disabled={currentStep === 1 || isLoading}
-        >
-          Back
-        </Button>
-        
-        {currentStep < 3 ? (
-          <Button onClick={handleNext}>Next Step</Button>
-        ) : (
-          <Button onClick={handleSubmit} isLoading={isLoading}>Generate Assessment</Button>
-        )}
-      </div>
-    </div>
+        {/* Footer Buttons */}
+        <div className={styles.footer}>
+          <button type="button" className={styles.prevBtn} onClick={() => router.push('/')}>← Previous</button>
+          <button type="submit" className={styles.nextBtn} disabled={isLoading || isGenerating}>
+            {isLoading ? 'Submitting...' : 'Next →'}
+          </button>
+        </div>
+      </form>
+    </>
   );
 }

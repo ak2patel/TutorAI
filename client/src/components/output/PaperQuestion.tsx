@@ -1,4 +1,4 @@
-import type { IQuestion } from '../../../types';
+import type { IQuestion } from '../../types';
 import styles from './PaperQuestion.module.css';
 
 interface Props {
@@ -8,12 +8,10 @@ interface Props {
 export default function PaperQuestion({ question }: Props) {
   return (
     <div className={styles.questionContainer}>
-      <div className={styles.questionHeader}>
-        <div className={styles.textWrapper}>
-          <span className={styles.qNumber}>Q{question.questionNumber}.</span>
-          <span className={styles.qText}>{question.text}</span>
-        </div>
-        <span className={styles.qMarks}>[{question.marks}]</span>
+      <div className={styles.questionTextRow}>
+        <span className={styles.qText}>
+          {question.questionNumber}. [{question.difficulty}] {question.text} [{question.marks} {question.marks === 1 ? 'Mark' : 'Marks'}]
+        </span>
       </div>
 
       {question.options && question.options.length > 0 && (
@@ -29,11 +27,6 @@ export default function PaperQuestion({ question }: Props) {
           })}
         </div>
       )}
-      
-      {/* Visual difficulty indicator (optional, maybe hide for print) */}
-      <div className={`${styles.difficultyBadge} ${styles[question.difficulty.toLowerCase()]}`}>
-        {question.difficulty}
-      </div>
     </div>
   );
 }
