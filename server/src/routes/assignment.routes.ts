@@ -4,6 +4,7 @@ import {
   getAssignments,
   getAssignment,
   regenerateAssignment,
+  updateAssignment,
   deleteAssignment,
 } from '../controllers/assignment.controller';
 import { validate, createAssignmentSchema, idParamSchema } from '../middleware/validate';
@@ -26,6 +27,9 @@ router.post('/', generationLimiter, validate(createAssignmentSchema), createAssi
 
 // Regenerate question paper
 router.post('/:id/regenerate', generationLimiter, validate(idParamSchema, 'params'), regenerateAssignment);
+
+// Update assignment (rename)
+router.patch('/:id', validate(idParamSchema, 'params'), updateAssignment);
 
 // Delete assignment
 router.delete('/:id', validate(idParamSchema, 'params'), deleteAssignment);

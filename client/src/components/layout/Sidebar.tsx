@@ -5,11 +5,11 @@ import { usePathname } from 'next/navigation';
 import styles from './Sidebar.module.css';
 
 const menuItems = [
-  { name: 'Home', path: '#', icon: '⊞' },
-  { name: 'My Groups', path: '#', icon: '☷' },
+  { name: 'Home', path: '/', icon: '⊞' },
+  { name: 'My Groups', path: '/', icon: '☷' },
   { name: 'Assignments', path: '/', icon: '☰', badge: 10 },
-  { name: 'AI Teacher\'s Toolkit', path: '#', icon: '☐' },
-  { name: 'My Library', path: '#', icon: '♫' },
+  { name: 'AI Teacher\'s Toolkit', path: '/toolkit', icon: '☐' },
+  { name: 'My Library', path: '/', icon: '♫' },
 ];
 
 export default function Sidebar() {
@@ -47,10 +47,10 @@ export default function Sidebar() {
 
       {/* Bottom */}
       <div className={styles.bottomSection}>
-        <div className={styles.menuItem}>
+        <Link href="/settings" className={styles.menuItem}>
           <span className={styles.menuIcon}>⚙</span>
           <span className={styles.menuName}>Settings</span>
-        </div>
+        </Link>
         <div className={styles.profileCard}>
           <div className={styles.profileAvatar}>
             <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="18" fill="#E0E0E0"/><circle cx="18" cy="14" r="6" fill="#999"/><ellipse cx="18" cy="30" rx="10" ry="7" fill="#999"/></svg>

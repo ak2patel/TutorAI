@@ -9,6 +9,19 @@ interface Props {
 }
 
 export default function QuestionPaper({ paper, onPrint, onShare }: Props) {
+  const handlePrint = () => {
+    // Add print class to body
+    document.body.classList.add('printing');
+    
+    // Trigger print
+    window.print();
+    
+    // Remove print class after print dialog closes
+    setTimeout(() => {
+      document.body.classList.remove('printing');
+    }, 1000);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.darkBanner}>
@@ -16,7 +29,7 @@ export default function QuestionPaper({ paper, onPrint, onShare }: Props) {
           <p className={styles.bannerText}>
             Certainly, Lakshya! Here are customized <strong>Question Paper</strong> for your CBSE {paper.className} {paper.subject} classes on the NCERT chapters:
           </p>
-          <button className={styles.downloadBtn} onClick={onPrint}>
+          <button className={styles.downloadBtn} onClick={handlePrint}>
             <span className={styles.icon}>📥</span> Download as PDF
           </button>
         </div>
@@ -54,11 +67,13 @@ export default function QuestionPaper({ paper, onPrint, onShare }: Props) {
           {paper.answerKey && paper.answerKey.length > 0 && (
             <div className={styles.answerKey}>
               <h3>Answer Key:</h3>
-              <ol>
+              <div className={styles.answerList}>
                 {paper.answerKey.map((ans, idx) => (
-                  <li key={idx}><strong>{ans.questionNumber}.</strong> {ans.answer}</li>
+                  <div key={idx} className={styles.answerItem}>
+                    <strong>{ans.questionNumber}.</strong> {ans.answer}
+                  </div>
                 ))}
-              </ol>
+              </div>
             </div>
           )}
         </div>

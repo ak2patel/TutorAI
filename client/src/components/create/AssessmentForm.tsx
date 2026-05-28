@@ -216,15 +216,21 @@ export default function AssessmentForm() {
                 </select>
                 <button type="button" className={styles.qtRemove} onClick={() => handleRemoveQuestionType(idx)} aria-label="Remove question type">×</button>
               </div>
-              <div className={styles.qtStepper}>
-                <button type="button" onClick={() => updateQT(idx, 'numberOfQuestions', Math.max(1, qt.numberOfQuestions - 1))} aria-label="Decrease questions">−</button>
-                <span>{qt.numberOfQuestions}</span>
-                <button type="button" onClick={() => updateQT(idx, 'numberOfQuestions', qt.numberOfQuestions + 1)} aria-label="Increase questions">+</button>
+              <div className={styles.qtStepperWrap}>
+                <span className={styles.qtMobileLabel}>No. of Questions</span>
+                <div className={styles.qtStepper}>
+                  <button type="button" onClick={() => updateQT(idx, 'numberOfQuestions', Math.max(1, qt.numberOfQuestions - 1))} aria-label="Decrease questions">−</button>
+                  <span>{qt.numberOfQuestions}</span>
+                  <button type="button" onClick={() => updateQT(idx, 'numberOfQuestions', qt.numberOfQuestions + 1)} aria-label="Increase questions">+</button>
+                </div>
               </div>
-              <div className={styles.qtStepper}>
-                <button type="button" onClick={() => updateQT(idx, 'marksPerQuestion', Math.max(1, qt.marksPerQuestion - 1))} aria-label="Decrease marks">−</button>
-                <span>{qt.marksPerQuestion}</span>
-                <button type="button" onClick={() => updateQT(idx, 'marksPerQuestion', qt.marksPerQuestion + 1)} aria-label="Increase marks">+</button>
+              <div className={styles.qtStepperWrap}>
+                <span className={styles.qtMobileLabel}>Marks</span>
+                <div className={styles.qtStepper}>
+                  <button type="button" onClick={() => updateQT(idx, 'marksPerQuestion', Math.max(1, qt.marksPerQuestion - 1))} aria-label="Decrease marks">−</button>
+                  <span>{qt.marksPerQuestion}</span>
+                  <button type="button" onClick={() => updateQT(idx, 'marksPerQuestion', qt.marksPerQuestion + 1)} aria-label="Increase marks">+</button>
+                </div>
               </div>
             </div>
           ))}

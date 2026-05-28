@@ -41,3 +41,7 @@ coverage/
 
 # Figma reference files (NOT for GitHub)
 pefiles/
+
+# Ignore agent generated summary markdown files
+*.md
+!README.md

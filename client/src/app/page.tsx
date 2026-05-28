@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useGetAssignmentsQuery } from '@/services/api';
+import AssignmentCard from '@/components/dashboard/AssignmentCard';
 import styles from './page.module.css';
 
 export default function Dashboard() {
@@ -67,16 +68,13 @@ export default function Dashboard() {
 
       {/* Cards grid */}
       <div className={styles.grid}>
-        {assignments.map((a) => (
-          <Link href={`/assignment/${a.id || a._id}`} key={a.id || a._id} className={styles.card}>
-            <div className={styles.cardTop}>
-              <h4 className={styles.cardTitle}>{a.title}</h4>
-              <button className={styles.cardMenu} onClick={(e) => e.preventDefault()}>⋮</button>
-            </div>
-            <div className={styles.cardDates}>
-              <span>Assigned on : {new Date(a.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')}</span>
-              <span>Due : {new Date(a.dueDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-')}</span>
-            </div>
+        {assignments.map((assignment) => (
+          <Link 
+            href={`/assignment/${assignment.id || assignment._id}`} 
+            key={assignment.id || assignment._id}
+            className={styles.cardLink}
+          >
+            <AssignmentCard assignment={assignment} />
           </Link>
         ))}
       </div>

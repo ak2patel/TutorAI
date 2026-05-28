@@ -297,6 +297,20 @@
   padding: 11px 8px;
 }
 
+.qtStepperWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.qtMobileLabel {
+  display: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
 .qtStepper button {
   width: 16px;
   height: 16px;
@@ -546,15 +560,74 @@
 @media (max-width: 768px) {
   .formCard {
     padding: 24px;
+    margin: 0 16px;
   }
+  
+  .progressBar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .progressStep {
+    width: 100%;
+  }
+  
+  .progressLine,
+  .progressLineInactive {
+    display: none;
+  }
+  
+  .qtHeader {
+    display: none;
+  }
+  
   .qtRow {
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--bg-off-white-20);
+    padding: 16px;
+    border-radius: 16px;
   }
+  
+  .qtSelectWrap {
+    width: 100%;
+  }
+  
+  .qtSelect {
+    width: 100%;
+  }
+  
+  .qtStepperWrap {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .qtMobileLabel {
+    display: block;
+    flex-shrink: 0;
+    margin-right: 12px;
+  }
+  
   .qtStepper {
-    width: 100px;
+    width: auto;
+    min-width: 120px;
   }
+  
   .footer {
     flex-direction: column;
     gap: 12px;
+  }
+  
+  .prevBtn,
+  .nextBtn {
+    width: 100%;
+  }
+  
+  .totalsRow {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
   }
 }

@@ -144,3 +144,27 @@ input, textarea, select {
   font-size: 14px;
   line-height: 140%;
 }
+
+/* Print Styles */
+@media print {
+  @page {
+    size: A4;
+    margin: 1cm;
+  }
+  
+  body {
+    background: white !important;
+  }
+  
+  /* Hide navigation and UI elements */
+  aside,
+  header,
+  nav,
+  button:not(.printable) {
+    display: none !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}

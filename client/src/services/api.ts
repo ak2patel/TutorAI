@@ -50,6 +50,19 @@ export const api = createApi({
       invalidatesTags: (_result, _error, id) => [{ type: 'Assignment', id }],
     }),
 
+    updateAssignment: builder.mutation<IAssignment, { id: string; title: string }>({
+      query: ({ id, title }) => ({
+        url: `/assignments/${id}`,
+        method: 'PATCH',
+        body: { title },
+      }),
+      transformResponse: (response: ApiResponse<IAssignment>) => response.data,
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: 'Assignment', id },
+        { type: 'Assignment', id: 'LIST' },
+      ],
+    }),
+
     deleteAssignment: builder.mutation<void, string>({
       query: (id) => ({
         url: `/assignments/${id}`,
@@ -65,5 +78,6 @@ export const {
   useGetAssignmentByIdQuery,
   useCreateAssignmentMutation,
   useRegenerateAssignmentMutation,
+  useUpdateAssignmentMutation,
   useDeleteAssignmentMutation,
 } = api;

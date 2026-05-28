@@ -19,6 +19,14 @@ const CACHE_PREFIX = 'assignment:';
  */
 export const createAssignment = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const body = req.body as CreateAssignmentRequest;
+  
+  console.log('📝 Creating new assignment:', {
+    title: body.title,
+    subject: body.subject,
+    totalQuestions: body.totalQuestions,
+    totalMarks: body.totalMarks,
+    questionTypes: body.questionTypes?.length
+  });
 
   const assignment = await Assignment.create({
     ...body,
@@ -26,8 +34,12 @@ export const createAssignment = asyncHandler(async (req: Request, res: Response)
     status: 'pending',
   });
 
+  console.log(`✅ Assignment created with ID: ${assignment.id}`);
+
   // Enqueue AI generation job
+  console.log(`📤 Enqueueing generation job for assignment ${assignment.id}`);
   await enqueueGenerationJob(assignment.id);
+  console.log(`✅ Job enqueued successfully`);
 
   const response: ApiResponse<IAssignment> = {
     success: true,
@@ -122,6 +134,41 @@ export const regenerateAssignment = asyncHandler(async (req: Request, res: Respo
     success: true,
     data: assignment.toJSON() as unknown as IAssignment,
     message: 'Regeneration queued',
+  };
+
+  res.json(response);
+});
+
+/**
+ * PATCH /api/assignments/:id
+ * Update assignment title
+ */
+export const updateAssignment = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const { title } = req.body;
+
+  if (!title || typeof title !== 'string' || title.trim().length === 0) {
+    throw createAppError('Title is required', 400);
+  }
+
+  const assignment = await Assignment.findByIdAndUpdate(
+    id,
+    { title: title.trim() },
+    { new: true, runValidators: true }
+  );
+
+  if (!assignment) {
+    throw createAppError('Assignment not found', 404);
+  }
+
+  // Invalidate cache
+  const redis = getRedisConnection();
+  await redis.del(`${CACHE_PREFIX}${id}`);
+
+  const response: ApiResponse<IAssignment> = {
+    success: true,
+    data: assignment.toJSON() as unknown as IAssignment,
+    message: 'Assignment updated successfully',
   };
 
   res.json(response);

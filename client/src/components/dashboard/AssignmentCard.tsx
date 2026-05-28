@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useDeleteAssignmentMutation } from '../../services/api';
+import { useDeleteAssignmentMutation, useUpdateAssignmentMutation } from '../../services/api';
 import type { IAssignment } from '../../types';
 import styles from './AssignmentCard.module.css';
 
@@ -11,7 +11,10 @@ interface Props {
 
 export default function AssignmentCard({ assignment }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [newTitle, setNewTitle] = useState(assignment.title);
   const [deleteAssignment, { isLoading: isDeleting }] = useDeleteAssignmentMutation();
+  const [updateAssignment, { isLoading: isUpdating }] = useUpdateAssignmentMutation();
   const router = useRouter();
 
   const handleMenuToggle = (e: React.MouseEvent) => {
@@ -20,11 +23,44 @@ export default function AssignmentCard({ assignment }: Props) {
     setMenuOpen(!menuOpen);
   };
 
+  const handleRename = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsRenaming(true);
+    setMenuOpen(false);
+  };
+
+  const handleSaveRename = async (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (newTitle.trim() && newTitle.trim() !== assignment.title) {
+      try {
+        await updateAssignment({ 
+          id: (assignment.id || assignment._id) as string, 
+          title: newTitle.trim() 
+        }).unwrap();
+      } catch (error) {
+        console.error('Failed to update assignment:', error);
+        alert('Failed to update assignment title');
+      }
+    }
+    
+    setIsRenaming(false);
+  };
+
+  const handleCancelRename = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setNewTitle(assignment.title);
+    setIsRenaming(false);
+  };
+
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (confirm('Are you sure you want to delete this assignment?')) {
-      await deleteAssignment(assignment.id);
+      await deleteAssignment((assignment.id || assignment._id) as string);
     }
     setMenuOpen(false);
   };
@@ -37,28 +73,65 @@ export default function AssignmentCard({ assignment }: Props) {
   return (
     <div className={styles.card}>
       <div className={styles.header}>
-        <h4 className={styles.title}>{assignment.title}</h4>
-        
-        <div className={styles.menuContainer}>
-          <button className={styles.menuButton} onClick={handleMenuToggle}>
-            ⋮
-          </button>
-          
-          {menuOpen && (
-            <div className={styles.dropdown}>
-              <Link href={`/assignment/${assignment.id}`} className={styles.dropdownItem}>
-                View Assignment
-              </Link>
+        {isRenaming ? (
+          <form onSubmit={handleSaveRename} className={styles.renameForm}>
+            <input
+              type="text"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              className={styles.renameInput}
+              autoFocus
+              onClick={(e) => e.stopPropagation()}
+              disabled={isUpdating}
+            />
+            <div className={styles.renameActions}>
               <button 
-                className={`${styles.dropdownItem} ${styles.danger}`}
-                onClick={handleDelete}
-                disabled={isDeleting}
+                type="submit" 
+                className={styles.saveBtn} 
+                onClick={(e) => e.stopPropagation()}
+                disabled={isUpdating}
               >
-                {isDeleting ? 'Deleting...' : 'Delete'}
+                ✓
+              </button>
+              <button 
+                type="button" 
+                className={styles.cancelBtn} 
+                onClick={handleCancelRename}
+                disabled={isUpdating}
+              >
+                ✕
               </button>
             </div>
-          )}
-        </div>
+          </form>
+        ) : (
+          <>
+            <h4 className={styles.title}>{assignment.title}</h4>
+            
+            <div className={styles.menuContainer}>
+              <button className={styles.menuButton} onClick={handleMenuToggle}>
+                ⋮
+              </button>
+              
+              {menuOpen && (
+                <div className={styles.dropdown}>
+                  <button 
+                    className={styles.dropdownItem}
+                    onClick={handleRename}
+                  >
+                    Rename
+                  </button>
+                  <button 
+                    className={`${styles.dropdownItem} ${styles.danger}`}
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? 'Deleting...' : 'Delete'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
       
       <div className={styles.details}>
@@ -70,13 +143,6 @@ export default function AssignmentCard({ assignment }: Props) {
           <span className={styles.dateLabel}>Due:</span>
           <span className={styles.dateValue}>{formatDate(assignment.dueDate)}</span>
         </div>
-      </div>
-      
-      <div className={styles.footer}>
-        <span className={`${styles.status} ${styles[assignment.status]}`}>
-          {assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1)}
-        </span>
-        <span className={styles.marks}>{assignment.totalMarks} Marks</span>
       </div>
       
       {/* Overlay to close menu when clicking outside */}
